@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบันทึกเคลมสินค้า</title>
+    <title>ระบบบันทึกเคลมสินค้า - iStudio NKS</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +13,8 @@
     <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Library สำหรับ Export Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -98,6 +100,9 @@
                 }
             });
 
+            // Export Button Event
+            document.getElementById('exportExcelBtn').addEventListener('click', window.exportToExcel);
+
             const invoiceInput = document.getElementById('invoice');
             const clearInvoiceBtn = document.getElementById('clearInvoiceBtn');
             const toggleClearBtn = () => {
@@ -138,6 +143,72 @@
         function updateUserDisplay(uid) {
             document.querySelectorAll('.user-role').forEach(el => el.innerText = uid);
         }
+
+        // --- Logic สำหรับ Export Excel ---
+        window.exportToExcel = async () => {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                Swal.fire({ icon: 'warning', title: 'กรุณาเลือกวันที่', text: 'กรุณาระบุช่วงวันที่ต้องการส่งออกข้อมูล', confirmButtonColor: '#4f46e5' });
+                return;
+            }
+
+            const exportBtn = document.getElementById('exportExcelBtn');
+            const originalContent = exportBtn.innerHTML;
+            exportBtn.disabled = true;
+            exportBtn.innerHTML = '<div class="loader mr-2"></div> กำลังดึงข้อมูล...';
+
+            try {
+                let allData = [];
+                let page = 1;
+                let limit = 10000;
+                let total = 0;
+
+                const firstRes = await fetch(`/.netlify/functions/getClaims?page=1&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
+                const firstJson = await firstRes.json();
+                total = firstJson.total;
+                allData = [...firstJson.data];
+
+                if (total > limit) {
+                    let totalPages = Math.ceil(total / limit);
+                    for (let p = 2; p <= totalPages; p++) {
+                        const res = await fetch(`/.netlify/functions/getClaims?page=${p}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
+                        const json = await res.json();
+                        allData = [...allData, ...json.data];
+                    }
+                }
+
+                if (allData.length === 0) {
+                    Swal.fire('ไม่พบข้อมูล', 'ไม่มีรายการเคลมในช่วงวันที่เลือก', 'info');
+                    return;
+                }
+
+                const formattedData = allData.map(item => ({
+                    'วันที่บันทึก': new Date(item.timestamp).toLocaleString('th-TH'),
+                    'เลขที่บิล (Invoice)': item.invoice,
+                    'ประเภทสินค้า': Array.isArray(item.product) ? item.product.join(', ') : item.product,
+                    'รหัสสินค้า (Part No)': Array.isArray(item.partNumber) ? item.partNumber.join(', ') : item.partNumber,
+                    'หมายเหตุ': item.remark || '-',
+                    'ผู้บันทึก': item.userId || 'ADMIN'
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(formattedData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Claim_History");
+                
+                XLSX.writeFile(workbook, `Claim_Report_${startDate}_to_${endDate}.xlsx`);
+
+                Swal.fire({ icon: 'success', title: 'ส่งออกสำเร็จ', text: `ดาวน์โหลดไฟล์เรียบร้อยแล้ว (${allData.length} รายการ)`, timer: 2000, showConfirmButton: false });
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire('Error', 'เกิดข้อผิดพลาดในการดึงข้อมูลเพื่อส่งออก', 'error');
+            } finally {
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = originalContent;
+            }
+        };
 
         window.quickCheckInvoice = async () => {
             const invoice = document.getElementById('invoice').value.trim();
@@ -338,7 +409,7 @@
                   <td class="px-4 py-4 text-xs text-gray-400 font-mono">${(item.userId || 'USER').slice(0,6)}...</td>
                   <td class="px-4 py-4 text-center">
                       <button class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50" onclick="window.deleteClaim('${item._id}')">
-                          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16\"></path></svg>
+                          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                       </button>
                   </td>
                 `;
@@ -462,7 +533,7 @@
         window.resetForm = () => {
             document.getElementById("invoice").value = "";
             document.getElementById('clearInvoiceBtn').style.display = 'none';
-            document.querySelectorAll('#productContainer input[type=\"checkbox\"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('#productContainer input[type="checkbox"]').forEach(cb => cb.checked = false);
             document.getElementById("remark").value = "";
             window.updatePartInputs();
         };
@@ -493,7 +564,7 @@
                 </div>
                 <div class="hidden md:block text-right">
                     <div class="text-xs font-bold text-gray-700">Admin User</div>
-                    <div class="text-[10px] text-gray-400 user-role">...</div>
+                    <div class="text-[10px] text-gray-400 user-role font-mono">...</div>
                 </div>
             </div>
         </div>
@@ -504,7 +575,7 @@
         
         <div class="text-center mb-8">
             <h2 class="font-display text-3xl font-bold text-gray-800 mb-2">บันทึกรายการเคลม</h2>
-            <p class="text-gray-500 text-sm">กรอกข้อมูลให้ครบถ้วนเพื่อบันทึกเข้าระบบ</p>
+            <p class="text-gray-500 text-sm">กรอกข้อมูลให้ครบถ้วนเพื่อบันทึกเข้าระบบ iStudio NKS</p>
         </div>
 
         <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-white p-6 md:p-10 relative overflow-hidden">
@@ -513,7 +584,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
                 
                 <div class="col-span-1 md:col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">เลขที่บิล (Invoice No.)</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1 text-uppercase">เลขที่บิล (Invoice No.)</label>
                     <div class="relative group">
                         <input type="text" id="invoice" 
                             class="input-transition w-full pl-5 pr-24 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 text-lg font-mono placeholder-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" 
@@ -534,7 +605,7 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-3 ml-1">เลือกประเภทสินค้า</label>
                     <div class="grid grid-cols-1 gap-3" id="productContainer">
                         
-                        <!-- Product Item: Film -->
+                        <!-- Film -->
                         <label class="cursor-pointer group relative">
                             <input type="checkbox" value="Film" class="peer sr-only">
                             <div class="p-3 bg-white border border-gray-200 rounded-2xl flex items-center gap-3 transition-all group-hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50/50 peer-checked:shadow-sm peer-checked:[&_.check-circle]:bg-indigo-500 peer-checked:[&_.check-circle]:border-indigo-500 peer-checked:[&_svg]:opacity-100">
@@ -545,14 +616,13 @@
                                     <p class="text-sm font-bold text-gray-700 group-hover:text-indigo-600 transition-colors">Film</p>
                                     <p class="text-[10px] text-gray-400 font-medium">ฟิล์มกันรอย</p>
                                 </div>
-                                <!-- Check Icon Box -->
                                 <div class="check-circle w-6 h-6 rounded-full border-2 border-gray-200 flex items-center justify-center transition-all">
                                     <svg class="text-white opacity-0 transition-opacity" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                                 </div>
                             </div>
                         </label>
 
-                        <!-- Product Item: Lense -->
+                        <!-- Lense -->
                         <label class="cursor-pointer group relative">
                             <input type="checkbox" value="Lense" class="peer sr-only">
                             <div class="p-3 bg-white border border-gray-200 rounded-2xl flex items-center gap-3 transition-all group-hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50/50 peer-checked:shadow-sm peer-checked:[&_.check-circle]:bg-indigo-500 peer-checked:[&_.check-circle]:border-indigo-500 peer-checked:[&_svg]:opacity-100">
@@ -570,7 +640,6 @@
                         </label>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <!-- Boxset -->
                             <label class="cursor-pointer group relative">
                                 <input type="checkbox" value="Boxset" class="peer sr-only">
                                 <div class="p-3 bg-white border border-gray-200 rounded-2xl flex items-center gap-2 transition-all group-hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50/50 peer-checked:[&_.check-box]:bg-indigo-500 peer-checked:[&_.check-box]:border-indigo-500 peer-checked:[&_svg]:opacity-100">
@@ -580,7 +649,6 @@
                                     <span class="text-xs font-bold text-gray-600">Boxset</span>
                                 </div>
                             </label>
-                            <!-- Cable -->
                             <label class="cursor-pointer group relative">
                                 <input type="checkbox" value="Cable" class="peer sr-only">
                                 <div class="p-3 bg-white border border-gray-200 rounded-2xl flex items-center gap-2 transition-all group-hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50/50 peer-checked:[&_.check-box]:bg-indigo-500 peer-checked:[&_.check-box]:border-indigo-500 peer-checked:[&_svg]:opacity-100">
@@ -590,7 +658,6 @@
                                     <span class="text-xs font-bold text-gray-600">Cable</span>
                                 </div>
                             </label>
-                            <!-- Case -->
                             <label class="cursor-pointer group relative col-span-2">
                                 <input type="checkbox" value="Case" class="peer sr-only">
                                 <div class="p-3 bg-white border border-gray-200 rounded-2xl flex items-center gap-2 transition-all group-hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50/50 peer-checked:[&_.check-box]:bg-indigo-500 peer-checked:[&_.check-box]:border-indigo-500 peer-checked:[&_svg]:opacity-100">
@@ -632,9 +699,12 @@
         </div>
     </main>
 
+    <!-- History Modal -->
     <div id="historyModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4 modal-enter">
-        <div class="bg-white w-full max-w-5xl h-[85vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
-            <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+        <div class="bg-white w-full max-w-6xl h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+            
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 flex-shrink-0">
                 <div>
                     <h3 class="text-xl font-bold text-gray-800">ประวัติการเคลม</h3>
                     <p id="totalCountDisplay" class="text-xs font-semibold text-indigo-600">กำลังโหลด...</p>
@@ -644,38 +714,63 @@
                 </button>
             </div>
 
-            <div class="px-6 py-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-white">
-                 <div class="col-span-2 md:col-span-2">
-                     <label class="text-xs font-bold text-gray-500 mb-1 block text-uppercase">แสดง</label>
-                     <select id="pageSizeSelect" class="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-indigo-500">
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-                 </div>
-                 <div class="col-span-3 md:col-span-2">
-                    <label class="text-xs font-bold text-gray-500 mb-1 block text-uppercase">ค้นหาจาก</label>
-                    <select id="searchTypeSelect" class="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-indigo-500">
-                       <option value="invoice">Invoice</option>
-                       <option value="part">Part No.</option>
-                   </select>
-                </div>
-                <div class="col-span-7 md:col-span-8 relative">
-                    <div class="flex gap-2">
-                        <div class="relative flex-1">
-                            <input type="text" id="historySearchInput" placeholder="พิมพ์คำค้นหา..." class="w-full p-2 pl-9 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
-                            <svg class="absolute left-3 top-2.5 text-gray-400" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                            <button id="clearSearchBtn" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600 hidden">&times;</button>
-                            <div id="suggestions" class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-xl z-20 hidden overflow-hidden"></div>
+            <!-- Export & Search Section (Improved Layout to prevent overlap) -->
+            <div class="px-6 py-4 bg-white border-b border-gray-100 flex-shrink-0">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                    <!-- Date Filter Start -->
+                    <div>
+                        <label class="text-[10px] font-bold text-indigo-400 mb-1 block uppercase">ตั้งแต่วันที่</label>
+                        <input type="date" id="startDate" class="w-full p-2 bg-gray-50 border border-indigo-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-300 transition-all">
+                    </div>
+                    <!-- Date Filter End + Export Button -->
+                    <div>
+                        <label class="text-[10px] font-bold text-indigo-400 mb-1 block uppercase">ถึงวันที่</label>
+                        <div class="flex gap-2">
+                            <input type="date" id="endDate" class="w-full p-2 bg-gray-50 border border-indigo-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-300 transition-all flex-1">
+                            <button id="exportExcelBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-green-700 transition-all shadow-md active:scale-95 whitespace-nowrap">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Export
+                            </button>
                         </div>
-                        <button id="searchBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">ค้นหา</button>
-                        <button id="refreshHistoryBtn" class="px-3 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">
+                    </div>
+                    <!-- Dropdowns -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 mb-1 block uppercase">แสดง</label>
+                            <select id="pageSizeSelect" class="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none">
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-gray-400 mb-1 block uppercase">ค้นหาจาก</label>
+                            <select id="searchTypeSelect" class="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none">
+                                <option value="invoice">Invoice</option>
+                                <option value="part">Part No.</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Search Input & Refresh -->
+                    <div class="flex gap-2 items-end">
+                        <div class="flex-1 relative">
+                            <label class="text-[10px] font-bold text-gray-400 mb-1 block uppercase">คำค้นหา</label>
+                            <div class="relative">
+                                <input type="text" id="historySearchInput" placeholder="พิมพ์คำค้นหา..." class="w-full p-2 pl-9 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-300">
+                                <svg class="absolute left-3 top-2.5 text-gray-400" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                <button id="clearSearchBtn" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600 hidden">&times;</button>
+                                <div id="suggestions" class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-xl z-20 hidden overflow-hidden"></div>
+                            </div>
+                        </div>
+                        <button id="searchBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition-all shadow-md active:scale-95 h-[38px]">ค้นหา</button>
+                        <button id="refreshHistoryBtn" class="px-3 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors border border-gray-200 h-[38px]">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                         </button>
                     </div>
                 </div>
             </div>
 
+            <!-- Table -->
             <div class="flex-1 overflow-auto px-6 relative">
                  <div class="text-center absolute top-2 left-0 right-0 pointer-events-none"><span id="historyStatus" class="text-xs text-indigo-500 font-bold bg-white/80 px-2 py-1 rounded-full"></span></div>
                  <table class="w-full text-left border-collapse">
@@ -686,15 +781,16 @@
                              <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">สินค้า</th>
                              <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">หมายเหตุ</th>
                              <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">เวลา</th>
-                             <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-uppercase">โดย</th>
-                             <th class="p-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider text-uppercase">Action</th>
+                             <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">โดย</th>
+                             <th class="p-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider">Action</th>
                          </tr>
                      </thead>
                      <tbody id="historyTableBody" class="divide-y divide-gray-100"></tbody>
                  </table>
             </div>
 
-            <div class="px-6 py-4 border-t border-gray-100 flex justify-between items-center bg-gray-50/50">
+            <!-- Footer Pagination -->
+            <div class="px-6 py-4 border-t border-gray-100 flex justify-between items-center bg-gray-50/50 flex-shrink-0">
                 <span id="pageInfo" class="text-sm text-gray-500 font-medium">หน้า 1</span>
                 <div class="flex gap-2">
                     <button id="prevPageBtn" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" onclick="window.loadPrevPage()">ย้อนกลับ</button>
