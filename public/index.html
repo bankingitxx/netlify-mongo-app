@@ -23,10 +23,10 @@
                         display: ['Fredoka', 'sans-serif'],
                     },
                     colors: {
-                        primary: '#4f46e5',   // Indigo 600
-                        primaryHover: '#4338ca', // Indigo 700
-                        secondary: '#ec4899', // Pink 500
-                        bgSoft: '#f3f4f6',    // Gray 100
+                        primary: '#4f46e5',
+                        primaryHover: '#4338ca',
+                        secondary: '#ec4899',
+                        bgSoft: '#f3f4f6',
                     }
                 }
             }
@@ -35,7 +35,7 @@
 
     <style>
         body {
-            background-color: #f0fdfa; /* Teal 50 */
+            background-color: #f0fdfa;
             background-image: 
                 radial-gradient(at 0% 0%, rgba(167, 243, 208, 0.3) 0px, transparent 50%),
                 radial-gradient(at 100% 0%, rgba(196, 181, 253, 0.3) 0px, transparent 50%),
@@ -44,13 +44,11 @@
             min-height: 100vh;
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Smooth Input Transitions */
         .input-transition {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -59,28 +57,12 @@
             box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1), 0 2px 4px -1px rgba(79, 70, 229, 0.06);
         }
 
-        /* Checkbox Custom Style */
-        .checkbox-card {
-            transition: all 0.2s;
-        }
-        .checkbox-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .checkbox-card input:checked + div {
-            background-color: #eff6ff; /* Blue 50 */
-            border-color: #3b82f6;
-            color: #1e40af;
-        }
-        
-        /* Modal Animation */
         .modal-enter { animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes modalPop {
             0% { opacity: 0; transform: scale(0.95) translateY(10px); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        /* Loading Spinner */
         .loader {
             border: 2px solid #f3f3f3;
             border-top: 2px solid #4f46e5;
@@ -92,7 +74,6 @@
     </style>
 
     <script>
-        // --- LOGIC เดิมทั้งหมด (ไม่เปลี่ยน เพื่อให้ทำงานกับ Netlify Functions ได้) ---
         let currentPage = 1;
         let pageSize = 25;
         let currentTotalCount = 0;
@@ -102,7 +83,6 @@
         window.onload = () => {
             updateUserDisplay(userId);
 
-            // Event Listeners
             document.getElementById('submitBtn').addEventListener('click', window.checkDuplicate);
             document.getElementById('viewHistoryBtn').addEventListener('click', window.openHistoryModal);
             
@@ -118,7 +98,6 @@
                 }
             });
 
-            // Clear Button Logic
             const invoiceInput = document.getElementById('invoice');
             const clearInvoiceBtn = document.getElementById('clearInvoiceBtn');
             const toggleClearBtn = () => {
@@ -131,7 +110,6 @@
                 invoiceInput.focus();
             });
 
-            // Search Logic
             document.getElementById('searchBtn').addEventListener('click', window.initSearch);
             document.getElementById('historySearchInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') window.initSearch();
@@ -160,8 +138,6 @@
         function updateUserDisplay(uid) {
             document.querySelectorAll('.user-role').forEach(el => el.innerText = uid);
         }
-
-        // --- Functions Logic ---
 
         window.quickCheckInvoice = async () => {
             const invoice = document.getElementById('invoice').value.trim();
@@ -263,7 +239,6 @@
             }
 
             searchTimeout = setTimeout(async () => {
-               // Show Loading State
                suggestionsEl.style.display = 'block';
                suggestionsEl.innerHTML = `
                 <div class="px-4 py-3 text-center text-gray-400 text-xs flex items-center justify-center gap-2">
@@ -363,7 +338,7 @@
                   <td class="px-4 py-4 text-xs text-gray-400 font-mono">${(item.userId || 'USER').slice(0,6)}...</td>
                   <td class="px-4 py-4 text-center">
                       <button class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50" onclick="window.deleteClaim('${item._id}')">
-                          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16\"></path></svg>
                       </button>
                   </td>
                 `;
@@ -419,7 +394,7 @@
                  console.error(e);
                  Swal.fire('Error', 'เกิดข้อผิดพลาด', 'error');
             } finally {
-                if(!submitBtn.disabled) return; // ถ้า submitForm ทำงานต่อ ไม่ต้อง reset ปุ่มตรงนี้
+                if(!submitBtn.disabled) return; 
                 submitBtn.disabled = false; 
                 submitBtn.innerHTML = 'บันทึกรายการเคลม';
                 submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
@@ -465,7 +440,6 @@
             });
         };
 
-        // Helpers
         window.openHistoryModal = () => {
             const modal = document.getElementById('historyModal');
             modal.style.display = 'flex';
@@ -488,7 +462,7 @@
         window.resetForm = () => {
             document.getElementById("invoice").value = "";
             document.getElementById('clearInvoiceBtn').style.display = 'none';
-            document.querySelectorAll('#productContainer input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('#productContainer input[type=\"checkbox\"]').forEach(cb => cb.checked = false);
             document.getElementById("remark").value = "";
             window.updatePartInputs();
         };
@@ -504,7 +478,7 @@
             </div>
             <div>
                 <h1 class="font-display font-semibold text-lg text-gray-800 leading-tight">Claim System</h1>
-                <p class="text-[10px] text-gray-400 font-medium tracking-wide">MANAGEMENT PORTAL</p>
+                <p class="text-[10px] text-gray-400 font-medium tracking-wide text-uppercase">MANAGEMENT PORTAL</p>
             </div>
         </div>
 
@@ -528,20 +502,16 @@
     <!-- Main Container -->
     <main class="container mx-auto px-4 py-8 max-w-4xl">
         
-        <!-- Header Section -->
-        <div class="text-center mb-8 animate-fade-in-down">
+        <div class="text-center mb-8">
             <h2 class="font-display text-3xl font-bold text-gray-800 mb-2">บันทึกรายการเคลม</h2>
             <p class="text-gray-500 text-sm">กรอกข้อมูลให้ครบถ้วนเพื่อบันทึกเข้าระบบ</p>
         </div>
 
-        <!-- Card Form -->
         <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-white p-6 md:p-10 relative overflow-hidden">
-            <!-- Decorative circle -->
             <div class="absolute -top-24 -right-24 w-48 h-48 bg-indigo-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
                 
-                <!-- Invoice Input -->
                 <div class="col-span-1 md:col-span-2">
                     <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">เลขที่บิล (Invoice No.)</label>
                     <div class="relative group">
@@ -560,53 +530,74 @@
                     </div>
                 </div>
 
-                <!-- Product Selection -->
                 <div class="col-span-1">
                     <label class="block text-sm font-semibold text-gray-700 mb-3 ml-1">เลือกประเภทสินค้า</label>
                     <div class="grid grid-cols-1 gap-3" id="productContainer">
                         
-                        <label class="checkbox-card cursor-pointer relative group">
+                        <!-- Product Item: Film -->
+                        <label class="cursor-pointer group relative">
                             <input type="checkbox" value="Film" class="peer sr-only">
-                            <div class="p-3 bg-white border border-gray-200 rounded-xl flex items-center gap-3 group-hover:border-indigo-300">
-                                <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
-                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                                </span>
-                                <span class="text-sm font-medium text-gray-600 group-hover:text-gray-900">Film (ฟิล์ม)</span>
-                                <div class="ml-auto w-5 h-5 border-2 border-gray-200 rounded-full peer-checked:bg-blue-500 peer-checked:border-blue-500 transition-colors"></div>
+                            <div class="p-3 bg-white border border-gray-200 rounded-2xl flex items-center gap-3 transition-all group-hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50/50 peer-checked:shadow-sm peer-checked:[&_.check-circle]:bg-indigo-500 peer-checked:[&_.check-circle]:border-indigo-500 peer-checked:[&_svg]:opacity-100">
+                                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center transition-transform group-hover:scale-110">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-gray-700 group-hover:text-indigo-600 transition-colors">Film</p>
+                                    <p class="text-[10px] text-gray-400 font-medium">ฟิล์มกันรอย</p>
+                                </div>
+                                <!-- Check Icon Box -->
+                                <div class="check-circle w-6 h-6 rounded-full border-2 border-gray-200 flex items-center justify-center transition-all">
+                                    <svg class="text-white opacity-0 transition-opacity" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
                             </div>
                         </label>
 
-                        <label class="checkbox-card cursor-pointer relative group">
+                        <!-- Product Item: Lense -->
+                        <label class="cursor-pointer group relative">
                             <input type="checkbox" value="Lense" class="peer sr-only">
-                            <div class="p-3 bg-white border border-gray-200 rounded-xl flex items-center gap-3 group-hover:border-indigo-300">
-                                <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
-                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-                                </span>
-                                <span class="text-sm font-medium text-gray-600 group-hover:text-gray-900">Lense (เลนส์)</span>
-                                <div class="ml-auto w-5 h-5 border-2 border-gray-200 rounded-full peer-checked:bg-blue-500 peer-checked:border-blue-500 transition-colors"></div>
+                            <div class="p-3 bg-white border border-gray-200 rounded-2xl flex items-center gap-3 transition-all group-hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50/50 peer-checked:shadow-sm peer-checked:[&_.check-circle]:bg-indigo-500 peer-checked:[&_.check-circle]:border-indigo-500 peer-checked:[&_svg]:opacity-100">
+                                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center transition-transform group-hover:scale-110">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-gray-700 group-hover:text-indigo-600 transition-colors">Lense</p>
+                                    <p class="text-[10px] text-gray-400 font-medium">กระจกเลนส์กล้อง</p>
+                                </div>
+                                <div class="check-circle w-6 h-6 rounded-full border-2 border-gray-200 flex items-center justify-center transition-all">
+                                    <svg class="text-white opacity-0 transition-opacity" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
                             </div>
                         </label>
 
-                        <div class="grid grid-cols-2 gap-2">
-                             <label class="checkbox-card cursor-pointer relative group">
+                        <div class="grid grid-cols-2 gap-3">
+                            <!-- Boxset -->
+                            <label class="cursor-pointer group relative">
                                 <input type="checkbox" value="Boxset" class="peer sr-only">
-                                <div class="p-3 bg-white border border-gray-200 rounded-xl flex items-center gap-2 group-hover:border-indigo-300">
-                                    <div class="w-4 h-4 rounded-full border border-gray-300 peer-checked:bg-blue-500 peer-checked:border-blue-500"></div>
-                                    <span class="text-sm text-gray-600">Boxset</span>
+                                <div class="p-3 bg-white border border-gray-200 rounded-2xl flex items-center gap-2 transition-all group-hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50/50 peer-checked:[&_.check-box]:bg-indigo-500 peer-checked:[&_.check-box]:border-indigo-500 peer-checked:[&_svg]:opacity-100">
+                                    <div class="check-box w-5 h-5 rounded-md border-2 border-gray-200 flex items-center justify-center transition-all">
+                                        <svg class="text-white opacity-0 transition-opacity" width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-600">Boxset</span>
                                 </div>
                             </label>
-                             <label class="checkbox-card cursor-pointer relative group">
+                            <!-- Cable -->
+                            <label class="cursor-pointer group relative">
                                 <input type="checkbox" value="Cable" class="peer sr-only">
-                                <div class="p-3 bg-white border border-gray-200 rounded-xl flex items-center gap-2 group-hover:border-indigo-300">
-                                    <div class="w-4 h-4 rounded-full border border-gray-300 peer-checked:bg-blue-500 peer-checked:border-blue-500"></div>
-                                    <span class="text-sm text-gray-600">Cable</span>
+                                <div class="p-3 bg-white border border-gray-200 rounded-2xl flex items-center gap-2 transition-all group-hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50/50 peer-checked:[&_.check-box]:bg-indigo-500 peer-checked:[&_.check-box]:border-indigo-500 peer-checked:[&_svg]:opacity-100">
+                                    <div class="check-box w-5 h-5 rounded-md border-2 border-gray-200 flex items-center justify-center transition-all">
+                                        <svg class="text-white opacity-0 transition-opacity" width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-600">Cable</span>
                                 </div>
                             </label>
-                             <label class="checkbox-card cursor-pointer relative group col-span-2">
+                            <!-- Case -->
+                            <label class="cursor-pointer group relative col-span-2">
                                 <input type="checkbox" value="Case" class="peer sr-only">
-                                <div class="p-3 bg-white border border-gray-200 rounded-xl flex items-center gap-2 group-hover:border-indigo-300">
-                                    <div class="w-4 h-4 rounded-full border border-gray-300 peer-checked:bg-blue-500 peer-checked:border-blue-500"></div>
-                                    <span class="text-sm text-gray-600">Case (เคส)</span>
+                                <div class="p-3 bg-white border border-gray-200 rounded-2xl flex items-center gap-2 transition-all group-hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50/50 peer-checked:[&_.check-box]:bg-indigo-500 peer-checked:[&_.check-box]:border-indigo-500 peer-checked:[&_svg]:opacity-100">
+                                    <div class="check-box w-5 h-5 rounded-md border-2 border-gray-200 flex items-center justify-center transition-all">
+                                        <svg class="text-white opacity-0 transition-opacity" width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-600">Case (เคส)</span>
                                 </div>
                             </label>
                         </div>
@@ -614,11 +605,10 @@
                     </div>
                 </div>
 
-                <!-- Part Number & Remark -->
                 <div class="col-span-1 flex flex-col gap-5">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">รหัสสินค้า (Part Number)</label>
-                        <div id="partNumberContainer" class="min-h-[140px] max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                        <div id="partNumberContainer" class="min-h-[140px] max-h-[300px] overflow-y-auto pr-2">
                             <!-- Dynamic Content -->
                         </div>
                     </div>
@@ -629,13 +619,12 @@
                     </div>
                 </div>
 
-                <!-- Submit Button -->
                 <div class="col-span-1 md:col-span-2 pt-4 border-t border-gray-100">
                     <button id="submitBtn" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold text-lg rounded-2xl shadow-lg shadow-indigo-500/30 transform transition-all active:scale-[0.98] flex justify-center items-center gap-2">
                         บันทึกรายการเคลม
                     </button>
                     
-                    <button id="viewHistoryMobile" class="sm:hidden w-full mt-3 py-3 bg-white text-gray-600 border border-gray-200 font-medium rounded-xl hover:bg-gray-50 transition-colors" onclick="window.openHistoryModal()">
+                    <button class="sm:hidden w-full mt-3 py-3 bg-white text-gray-600 border border-gray-200 font-medium rounded-xl hover:bg-gray-50 transition-colors" onclick="window.openHistoryModal()">
                         ดูประวัติการเคลม
                     </button>
                 </div>
@@ -643,11 +632,8 @@
         </div>
     </main>
 
-    <!-- History Modal -->
     <div id="historyModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4 modal-enter">
         <div class="bg-white w-full max-w-5xl h-[85vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
-            
-            <!-- Modal Header -->
             <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <div>
                     <h3 class="text-xl font-bold text-gray-800">ประวัติการเคลม</h3>
@@ -658,10 +644,9 @@
                 </button>
             </div>
 
-            <!-- Filters -->
             <div class="px-6 py-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-white">
                  <div class="col-span-2 md:col-span-2">
-                     <label class="text-xs font-bold text-gray-500 mb-1 block">แสดง</label>
+                     <label class="text-xs font-bold text-gray-500 mb-1 block text-uppercase">แสดง</label>
                      <select id="pageSizeSelect" class="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-indigo-500">
                         <option value="25">25</option>
                         <option value="50">50</option>
@@ -669,7 +654,7 @@
                     </select>
                  </div>
                  <div class="col-span-3 md:col-span-2">
-                    <label class="text-xs font-bold text-gray-500 mb-1 block">ค้นหาจาก</label>
+                    <label class="text-xs font-bold text-gray-500 mb-1 block text-uppercase">ค้นหาจาก</label>
                     <select id="searchTypeSelect" class="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-indigo-500">
                        <option value="invoice">Invoice</option>
                        <option value="part">Part No.</option>
@@ -681,8 +666,6 @@
                             <input type="text" id="historySearchInput" placeholder="พิมพ์คำค้นหา..." class="w-full p-2 pl-9 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
                             <svg class="absolute left-3 top-2.5 text-gray-400" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                             <button id="clearSearchBtn" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600 hidden">&times;</button>
-                            
-                            <!-- Suggestions Dropdown -->
                             <div id="suggestions" class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-xl z-20 hidden overflow-hidden"></div>
                         </div>
                         <button id="searchBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">ค้นหา</button>
@@ -693,10 +676,8 @@
                 </div>
             </div>
 
-            <!-- Table -->
             <div class="flex-1 overflow-auto px-6 relative">
                  <div class="text-center absolute top-2 left-0 right-0 pointer-events-none"><span id="historyStatus" class="text-xs text-indigo-500 font-bold bg-white/80 px-2 py-1 rounded-full"></span></div>
-                 
                  <table class="w-full text-left border-collapse">
                      <thead class="sticky top-0 bg-white shadow-sm z-10">
                          <tr>
@@ -705,17 +686,14 @@
                              <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">สินค้า</th>
                              <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">หมายเหตุ</th>
                              <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">เวลา</th>
-                             <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">โดย</th>
-                             <th class="p-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider">Action</th>
+                             <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-uppercase">โดย</th>
+                             <th class="p-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider text-uppercase">Action</th>
                          </tr>
                      </thead>
-                     <tbody id="historyTableBody" class="divide-y divide-gray-100">
-                         <!-- Data Row Example -->
-                     </tbody>
+                     <tbody id="historyTableBody" class="divide-y divide-gray-100"></tbody>
                  </table>
             </div>
 
-            <!-- Footer Pagination -->
             <div class="px-6 py-4 border-t border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <span id="pageInfo" class="text-sm text-gray-500 font-medium">หน้า 1</span>
                 <div class="flex gap-2">
@@ -723,9 +701,7 @@
                     <button id="nextPageBtn" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" onclick="window.loadNextPage()">ถัดไป</button>
                 </div>
             </div>
-
         </div>
     </div>
-
 </body>
 </html>
