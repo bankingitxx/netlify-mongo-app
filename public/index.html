@@ -3,403 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดการการเคลมสินค้า (Glass UI)</title>
+    <title>ระบบบันทึกเคลมสินค้า</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                        display: ['Fredoka', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#4f46e5',   // Indigo 600
+                        primaryHover: '#4338ca', // Indigo 700
+                        secondary: '#ec4899', // Pink 500
+                        bgSoft: '#f3f4f6',    // Gray 100
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
-        :root {
-            --bg-dark: #0f172a;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-highlight: rgba(255, 255, 255, 0.15);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary-neon: #0ea5e9; /* Sky Blue */
-            --primary-glow: rgba(14, 165, 233, 0.5);
-            --secondary-neon: #d946ef; /* Fuchsia */
-            --success-neon: #10b981;
-            --warning-neon: #f59e0b;
-            --danger-neon: #ef4444;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            outline: none;
-        }
-
         body {
-            font-family: 'Prompt', 'Outfit', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* --- Animated Background Orbs --- */
-        .background {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            background: linear-gradient(to bottom right, #0f172a, #1e1b4b);
-            overflow: hidden;
-        }
-
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.6;
-            animation: floatOrb 20s infinite ease-in-out;
-        }
-        .orb-1 { width: 400px; height: 400px; background: #4f46e5; top: -100px; left: -100px; animation-delay: 0s; }
-        .orb-2 { width: 300px; height: 300px; background: #ec4899; bottom: 10%; right: -50px; animation-delay: -5s; }
-        .orb-3 { width: 250px; height: 250px; background: #06b6d4; top: 40%; left: 40%; animation-delay: -10s; }
-
-        @keyframes floatOrb {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(30px, -50px); }
-        }
-
-        /* --- Layout --- */
-        .dashboard {
-            display: flex;
+            background-color: #f0fdfa; /* Teal 50 */
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(167, 243, 208, 0.3) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(196, 181, 253, 0.3) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(252, 165, 165, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
             min-height: 100vh;
         }
 
-        /* Sidebar */
-        .sidebar {
-            width: 260px;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid var(--glass-border);
-            display: flex;
-            flex-direction: column;
-            padding: 24px;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-        }
-
-        .sidebar-header {
-            display: flex; align-items: center; gap: 12px;
-            margin-bottom: 40px;
-        }
-        .logo {
-            width: 40px; height: 40px;
-            background: linear-gradient(135deg, var(--primary-neon), var(--secondary-neon));
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 20px; color: white;
-            box-shadow: 0 0 15px var(--primary-glow);
-        }
-        .logo-text { font-size: 20px; font-weight: 600; letter-spacing: 0.5px; }
-
-        .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-        .nav-item a {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 16px;
-            border-radius: var(--radius-md);
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-        .nav-item a:hover, .nav-item a.active {
-            background: var(--glass-highlight);
-            color: var(--text-main);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .nav-icon { width: 20px; height: 20px; }
-
-        .sidebar-footer {
-            padding-top: 20px;
-            border-top: 1px solid var(--glass-border);
-        }
-        .user-profile {
-            display: flex; align-items: center; gap: 12px;
-            padding: 10px;
-            background: var(--glass-bg);
-            border-radius: var(--radius-md);
-            border: 1px solid var(--glass-border);
-        }
-        .user-avatar {
-            width: 36px; height: 36px;
-            background: linear-gradient(135deg, var(--success-neon), var(--primary-neon));
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: bold;
-        }
-        .user-info { flex: 1; overflow: hidden; }
-        .user-name { font-size: 14px; font-weight: 600; }
-        .user-role { font-size: 11px; color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-        }
-
-        .navbar {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px;
-        }
-        .page-title { font-size: 28px; font-weight: 600; }
-
-        /* --- Glass Cards --- */
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            margin-bottom: 30px;
-            position: relative;
-            overflow: hidden;
-        }
-        .glass-card::before {
-            content: '';
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
-            pointer-events: none;
-        }
-
-        /* --- Form Elements --- */
-        .form-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
-        }
-        .form-group { margin-bottom: 0; display: flex; flex-direction: column; gap: 8px; }
-        .full-width { grid-column: span 2; }
-        
-        label { font-size: 14px; color: var(--text-muted); font-weight: 500; }
-
-        input[type="text"], select, textarea {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-md);
-            padding: 12px 16px;
-            color: var(--text-main);
-            font-family: inherit;
-            transition: all 0.3s;
-        }
-        input[type="text"]:focus, select:focus, textarea:focus {
-            border-color: var(--primary-neon);
-            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
-            background: rgba(15, 23, 42, 0.8);
-        }
-
-        /* Checkbox Group */
-        .checkbox-group {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;
-            background: rgba(15, 23, 42, 0.4);
-            padding: 15px; border-radius: var(--radius-md);
-            border: 1px solid var(--glass-border);
-        }
-        .checkbox-item {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 14px; cursor: pointer;
-            padding: 8px 12px; border-radius: 8px;
-            transition: background 0.2s;
-        }
-        .checkbox-item:hover { background: var(--glass-highlight); }
-        .checkbox-item input[type="checkbox"] {
-            accent-color: var(--primary-neon);
-            width: 18px; height: 18px; cursor: pointer;
-        }
-
-        /* Input with Buttons */
-        .input-wrapper-invoice { position: relative; display: flex; align-items: center; }
-        .input-wrapper-invoice input { padding-right: 90px; width: 100%; }
-        
-        .icon-btn {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            background: transparent; border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; transition: all 0.2s;
-            color: var(--text-muted);
-            width: 32px; height: 32px;
-        }
-        .icon-btn:hover { background: var(--glass-highlight); color: var(--text-main); }
-        
-        .check-invoice-btn { right: 8px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); }
-        .check-invoice-btn:hover { border-color: var(--primary-neon); color: var(--primary-neon); box-shadow: 0 0 10px rgba(14,165,233,0.2); }
-        
-        .clear-input-btn { right: 48px; color: var(--danger-neon); display: none; }
-        .clear-input-btn:hover { background: rgba(239, 68, 68, 0.2); }
-
-        /* Dynamic Parts */
-        #partNumberContainer {
-            display: flex; flex-direction: column; gap: 12px;
-            max-height: 250px; overflow-y: auto;
-            padding-right: 5px;
-        }
-        .part-number-entry {
-            background: rgba(15, 23, 42, 0.4);
-            padding: 12px; border-radius: var(--radius-md);
-            border: 1px solid var(--glass-border);
-            animation: fadeIn 0.3s ease;
-        }
-        .empty-parts-message {
-            text-align: center; padding: 30px;
-            color: var(--text-muted);
-            border: 2px dashed var(--glass-border);
-            border-radius: var(--radius-md);
-            background: rgba(15, 23, 42, 0.3);
-        }
-
-        /* Action Buttons */
-        .actions {
-            display: flex; gap: 16px; margin-top: 30px; padding-top: 20px;
-            border-top: 1px solid var(--glass-border);
-        }
-        .btn {
-            padding: 12px 24px; border-radius: var(--radius-md);
-            font-weight: 600; font-size: 15px;
-            cursor: pointer; border: none;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            transition: all 0.3s;
-            flex: 1;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-neon), #3b82f6);
-            color: white;
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5); }
-        .btn-primary:disabled { background: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-main);
-            border: 1px solid var(--glass-border);
-        }
-        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--text-muted); }
-
-        /* --- Modal (Glass Style) --- */
-        .custom-modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            display: none;
-            justify-content: center; align-items: center;
-        }
-        .modal-card {
-            width: 90vw; max-width: 1200px; height: 85vh;
-            background: #1e293b; /* Solid dark for readability */
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            display: flex; flex-direction: column;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            color: var(--text-main);
-        }
-        .modal-header {
-            padding: 20px 30px;
-            border-bottom: 1px solid var(--glass-border);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .modal-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-        
-        .filters-wrapper {
-            padding: 20px 30px;
-            display: flex; gap: 16px; align-items: flex-end;
-            background: rgba(0,0,0,0.2);
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        /* Search & Table */
-        .search-box { flex-grow: 1; position: relative; display: flex; gap: 10px; }
-        .suggestion-box {
-            position: absolute; top: 100%; left: 0; right: 0;
-            background: #1e293b; border: 1px solid var(--glass-border);
-            border-radius: 0 0 8px 8px; z-index: 50;
-            max-height: 200px; overflow-y: auto; display: none;
-        }
-        .suggestion-item { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--glass-border); }
-        .suggestion-item:hover { background: var(--glass-highlight); }
-
-        #historyTableContainer { flex: 1; overflow: auto; padding: 0 30px 30px 30px; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; margin-top: 10px; }
-        
-        th {
-            text-align: left; padding: 15px; color: var(--text-muted);
-            font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;
-            position: sticky; top: 0; background: #0f172a; z-index: 10;
-        }
-        td {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 15px; vertical-align: middle;
-            border-top: 1px solid transparent; border-bottom: 1px solid transparent;
-            font-size: 14px;
-        }
-        td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; border-left: 1px solid transparent; }
-        td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-right: 1px solid transparent; }
-        
-        tr:hover td { background: rgba(255, 255, 255, 0.08); border-color: var(--glass-border); }
-
-        .modal-footer {
-            padding: 15px 30px;
-            border-top: 1px solid var(--glass-border);
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.2);
-        }
-
-        /* Utilities & Badges */
-        .status-badge {
-            padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
-            display: inline-block;
-        }
-        .badge-neon { background: rgba(14, 165, 233, 0.2); color: var(--primary-neon); border: 1px solid rgba(14, 165, 233, 0.3); }
-        
-        .delete-btn-icon {
-            color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 6px; border-radius: 6px; transition: all 0.2s;
-        }
-        .delete-btn-icon:hover { color: var(--danger-neon); background: rgba(239, 68, 68, 0.1); }
-
-        /* Scrollbar */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Animation */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* SweetAlert2 Dark Theme Override */
-        div:where(.swal2-container) div:where(.swal2-popup) {
-            background: #1e293b !important;
-            color: #f8fafc !important;
-            border: 1px solid var(--glass-border);
+        /* Smooth Input Transitions */
+        .input-transition {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        div:where(.swal2-icon).swal2-warning { border-color: var(--warning-neon); color: var(--warning-neon); }
-        div:where(.swal2-icon).swal2-success { border-color: var(--success-neon); color: var(--success-neon); }
+        .input-transition:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1), 0 2px 4px -1px rgba(79, 70, 229, 0.06);
+        }
+
+        /* Checkbox Custom Style */
+        .checkbox-card {
+            transition: all 0.2s;
+        }
+        .checkbox-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .checkbox-card input:checked + div {
+            background-color: #eff6ff; /* Blue 50 */
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+        
+        /* Modal Animation */
+        .modal-enter { animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes modalPop {
+            0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Loading Spinner */
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #4f46e5;
+            border-radius: 50%;
+            width: 16px; height: 16px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 
     <script>
-        // Config เบื้องต้น
+        // --- LOGIC เดิมทั้งหมด (ไม่เปลี่ยน เพื่อให้ทำงานกับ Netlify Functions ได้) ---
         let currentPage = 1;
         let pageSize = 25;
         let currentTotalCount = 0;
         let searchTimeout = null;
-        const userId = "ADMIN-01"; // เนื่องจากเป็น App ภายใน กำหนด User ID ไว้ก่อน
+        const userId = "ADMIN-01"; 
 
         window.onload = () => {
-            // Setup User Display
             updateUserDisplay(userId);
 
             // Event Listeners
@@ -458,12 +158,11 @@
         };
 
         function updateUserDisplay(uid) {
-            document.querySelectorAll('.user-role').forEach(el => el.innerText = `ID: ${uid}`);
+            document.querySelectorAll('.user-role').forEach(el => el.innerText = uid);
         }
 
-        // --- Logic Functions (Converted to Netlify Functions) ---
+        // --- Functions Logic ---
 
-        // 1. Quick Check (ตรวจสอบประวัติทันที)
         window.quickCheckInvoice = async () => {
             const invoice = document.getElementById('invoice').value.trim();
             if(!invoice) {
@@ -473,7 +172,7 @@
 
             const btn = document.getElementById('quickCheckBtn');
             const originalIcon = btn.innerHTML;
-            btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite"></div>';
+            btn.innerHTML = '<div class="loader"></div>';
             btn.style.pointerEvents = 'none';
 
             try {
@@ -482,83 +181,74 @@
 
                 if (data.length === 0) {
                     Swal.fire({
-                        title: 'ไม่พบประวัติ',
-                        text: `Invoice: ${invoice} ยังไม่เคยมีการบันทึกการเคลม`,
+                        title: '✅ ไม่พบประวัติ',
+                        text: `Invoice: ${invoice} ยังไม่เคยมีการบันทึก`,
                         icon: 'success', confirmButtonText: 'ตกลง', confirmButtonColor: '#10b981'
                     });
                 } else {
-                    let historyHtml = '<div style="text-align:left; font-size:14px; display:flex; flex-direction:column; gap:8px;">';
+                    let historyHtml = '<div class="text-left text-sm flex flex-col gap-2">';
                     data.forEach(d => {
                         const date = new Date(d.timestamp).toLocaleDateString('th-TH');
                         const prods = Array.isArray(d.product) ? d.product.join(', ') : d.product;
                         historyHtml += `
-                            <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
-                                <div><strong style="color:#94a3b8">สินค้า:</strong> <span style="color:#0ea5e9">${prods}</span></div>
-                                <div><strong style="color:#94a3b8">วันที่:</strong> ${date}</div>
-                                <div style="color:#94a3b8; font-size:12px;"><strong>Part:</strong> ${d.partNumber.join(', ')}</div>
+                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                <div class="font-semibold text-gray-700">${prods}</div>
+                                <div class="text-xs text-gray-500">วันที่: ${date}</div>
+                                <div class="text-xs text-blue-500 mt-1">Part: ${d.partNumber.join(', ')}</div>
                             </div>`;
                     });
                     historyHtml += '</div>';
 
                     Swal.fire({
-                        title: 'เคยมีการเคลมแล้ว!',
+                        title: '⚠️ เคยมีการเคลมแล้ว!',
                         html: historyHtml,
                         icon: 'warning', confirmButtonText: 'รับทราบ', confirmButtonColor: '#f59e0b'
                     });
                 }
             } catch(e) {
                 console.error(e);
-                Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+                Swal.fire('Error', 'เชื่อมต่อ Server ไม่ได้', 'error');
             } finally {
                 btn.innerHTML = originalIcon;
                 btn.style.pointerEvents = 'auto';
             }
         };
 
-        // 2. Update Part Inputs (UI Only - เหมือนเดิม)
         window.updatePartInputs = () => {
             const container = document.getElementById('partNumberContainer');
             const currentValues = {};
-            container.querySelectorAll('.part-number-entry').forEach(div => {
-               const input = div.querySelector('input');
-               const prod = div.dataset.product;
-               if (prod && input) currentValues[prod] = input.value;
+            container.querySelectorAll('.part-number-entry input').forEach(input => {
+               const prod = input.closest('.part-number-entry').dataset.product;
+               if (prod) currentValues[prod] = input.value;
             });
 
             const selectedCheckboxes = Array.from(document.querySelectorAll('#productContainer input[type="checkbox"]:checked'));
             container.innerHTML = ''; 
 
             if (selectedCheckboxes.length === 0) {
-                container.innerHTML = `<div class="empty-parts-message">กรุณาเลือก "ประเภทสินค้า" ด้านบนเพื่อระบุ Part Number</div>`;
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-8 text-gray-400 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                        <svg class="w-10 h-10 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                        <span class="text-sm">เลือกประเภทสินค้าด้านบนก่อนนะครับ</span>
+                    </div>`;
                 return;
             }
 
             selectedCheckboxes.forEach(cb => {
                 const product = cb.value;
                 const div = document.createElement('div');
-                div.className = 'part-number-entry';
+                div.className = 'part-number-entry mb-3 animate-fade-in-up';
                 div.dataset.product = product;
                 
-                const label = document.createElement('label');
-                label.style.marginBottom = '6px';
-                label.style.display = 'block';
-                label.innerText = `Part Number สำหรับ ${product}`;
-
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.className = 'partNumberInput';
-                input.placeholder = `ระบุรหัสของสินค้า ${product}`;
-                input.required = true;
-                
-                if (currentValues[product]) input.value = currentValues[product];
-
-                div.appendChild(label);
-                div.appendChild(input);
+                div.innerHTML = `
+                    <label class="block text-xs font-semibold text-gray-600 mb-1 ml-1">Part Number ของ ${product}</label>
+                    <input type="text" class="partNumberInput w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all" 
+                        placeholder="กรอกรหัสสินค้า ${product}..." required value="${currentValues[product] || ''}">
+                `;
                 container.appendChild(div);
             });
         };
 
-        // 3. Search Logic
         window.handleSearchInput = (e) => {
             const val = e.target.value.trim();
             const suggestionsEl = document.getElementById('suggestions');
@@ -573,6 +263,13 @@
             }
 
             searchTimeout = setTimeout(async () => {
+               // Show Loading State
+               suggestionsEl.style.display = 'block';
+               suggestionsEl.innerHTML = `
+                <div class="px-4 py-3 text-center text-gray-400 text-xs flex items-center justify-center gap-2">
+                    <div class="loader w-3 h-3 border-gray-300 border-t-indigo-500"></div> กำลังค้นหา...
+                </div>`;
+
                try {
                     const res = await fetch(`/.netlify/functions/getClaims?search=${val}&limit=5`);
                     const json = await res.json();
@@ -581,16 +278,19 @@
                     if (data && data.length > 0) {
                         suggestionsEl.innerHTML = data.map(d => {
                             const prodDisplay = Array.isArray(d.product) ? d.product.join(', ') : (d.product || '');
-                            return `<div class="suggestion-item" onclick="window.applySearchSelection('${d.invoice}')">
-                                      <div style="color:white; font-weight:bold;">${d.invoice}</div>
-                                      <div style="font-size:12px; color:#94a3b8;">${prodDisplay}</div>
-                                    </div>`;
+                            return `
+                                <div class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0" onclick="window.applySearchSelection('${d.invoice}')">
+                                    <div class="font-bold text-gray-800 text-sm">${d.invoice}</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">${prodDisplay}</div>
+                                </div>`;
                         }).join('');
-                        suggestionsEl.style.display = 'block';
                     } else {
-                        suggestionsEl.style.display = 'none';
+                        suggestionsEl.innerHTML = `<div class="px-4 py-3 text-center text-gray-400 text-xs">ไม่พบข้อมูล</div>`;
                     }
-               } catch(e) { console.error(e); }
+               } catch(e) { 
+                   console.error(e); 
+                   suggestionsEl.style.display = 'none';
+               }
             }, 600);
         };
 
@@ -605,12 +305,11 @@
             await window.loadPage(1);
         };
 
-        // 4. Load Data to Table
         window.loadPage = async (page) => {
             const status = document.getElementById('historyStatus');
-            status.innerText = 'กำลังโหลดข้อมูล...';
+            status.innerText = 'กำลังโหลด...';
             const tbody = document.getElementById('historyTableBody');
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color:#94a3b8;">กำลังค้นหาข้อมูล...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-gray-400">กำลังค้นหาข้อมูล...</td></tr>';
 
             try {
                 const searchVal = document.getElementById('historySearchInput').value.trim();
@@ -627,7 +326,7 @@
                 const data = json.data || [];
                 currentTotalCount = json.total || 0;
 
-                document.getElementById('totalCountDisplay').innerText = `${currentTotalCount.toLocaleString()} รายการ`;
+                document.getElementById('totalCountDisplay').innerText = `ทั้งหมด ${currentTotalCount.toLocaleString()} รายการ`;
                 
                 window.renderTable(data);
                 status.innerText = '';
@@ -636,41 +335,42 @@
             } catch (e) {
                 console.error(e);
                 status.innerText = '';
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#ef4444; padding:20px;">Error: ${e.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-red-500 py-4">Error: ${e.message}</td></tr>`;
             }
         };
 
         window.renderTable = (data) => {
             const body = document.getElementById('historyTableBody');
             if (data.length === 0) {
-                body.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 60px; color: var(--text-muted);">ไม่พบรายการที่ค้นหา</td></tr>';
+                body.innerHTML = '<tr><td colspan="7" class="text-center py-12 text-gray-400 font-light">ไม่พบรายการที่ค้นหา</td></tr>';
                 return;
             }
 
             body.innerHTML = '';
             data.forEach(item => {
-                const tr = body.insertRow();
-                const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleString('th-TH') : 'N/A';
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-none";
+                const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleString('th-TH') : '-';
                 const parts = Array.isArray(item.partNumber) ? item.partNumber.join(', ') : item.partNumber;
                 const products = Array.isArray(item.product) ? item.product.join(', ') : item.product;
                 
                 tr.innerHTML = `
-                  <td><div style="font-family:'Space Mono', monospace; font-weight:600; color:white;">${item.invoice}</div></td>
-                  <td><div class="status-badge badge-neon">${parts}</div></td>
-                  <td>${products}</td>
-                  <td style="color:#94a3b8;">${item.remark || '-'}</td>
-                  <td style="font-size:13px; color:#94a3b8;">${dateStr}</td>
-                  <td style="font-family:monospace; font-size:12px; color:#64748b;">${(item.userId || 'USER').slice(0,6)}...</td>
-                  <td style="text-align:center">
-                      <button class="delete-btn-icon" onclick="window.deleteClaim('${item._id}')" title="ลบรายการ">
+                  <td class="px-4 py-4 text-sm font-medium text-gray-900 font-mono">${item.invoice}</td>
+                  <td class="px-4 py-4 text-sm text-gray-600"><span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded-md text-xs font-semibold">${parts}</span></td>
+                  <td class="px-4 py-4 text-sm text-gray-600">${products}</td>
+                  <td class="px-4 py-4 text-sm text-gray-500">${item.remark || '-'}</td>
+                  <td class="px-4 py-4 text-xs text-gray-400">${dateStr}</td>
+                  <td class="px-4 py-4 text-xs text-gray-400 font-mono">${(item.userId || 'USER').slice(0,6)}...</td>
+                  <td class="px-4 py-4 text-center">
+                      <button class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-red-50" onclick="window.deleteClaim('${item._id}')">
                           <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                       </button>
                   </td>
                 `;
+                body.appendChild(tr);
             });
         };
 
-        // 5. Check Duplicate & Submit
         window.checkDuplicate = async () => {
             const invoice = document.getElementById("invoice").value.trim();
             const selectedProducts = Array.from(document.querySelectorAll('#productContainer input[type="checkbox"]:checked')).map(cb => cb.value);
@@ -678,17 +378,18 @@
             const invoicePattern = /^[A-Z0-9]{4}-[A-Z0-9]{3}-\d{11}$/;
 
             if (!invoice || !parts || selectedProducts.length === 0) {
-                Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอก Invoice, เลือกสินค้า และระบุ Part Number ให้ครบถ้วน', confirmButtonColor: '#0ea5e9' });
+                Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอก Invoice, เลือกสินค้า และระบุ Part Number ให้ครบ', confirmButtonColor: '#4f46e5' });
                 return;
             }
             if (!invoicePattern.test(invoice)) {
-                Swal.fire({ icon: 'error', title: 'รูปแบบ Invoice ไม่ถูกต้อง', text: 'ตัวอย่าง: B107-P02-25042700022', confirmButtonColor: '#0ea5e9' });
+                Swal.fire({ icon: 'error', title: 'รูปแบบ Invoice ไม่ถูกต้อง', text: 'ตัวอย่าง: B107-P02-25042700022', confirmButtonColor: '#4f46e5' });
                 return;
             }
 
             const submitBtn = document.getElementById("submitBtn");
             submitBtn.disabled = true;
-            submitBtn.innerHTML = 'กำลังตรวจสอบ...';
+            submitBtn.innerHTML = '<div class="loader mr-2"></div> กำลังตรวจสอบ...';
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
 
             try {
                 const res = await fetch(`/.netlify/functions/getClaims?mode=checkDuplicate&invoice=${invoice}`);
@@ -705,97 +406,82 @@
                 if (duplicateFound) {
                     const date = new Date(duplicateFound.timestamp).toLocaleString('th-TH');
                     const result = await Swal.fire({
-                        title: 'พบข้อมูลซ้ำ!',
+                        title: 'ข้อมูลซ้ำ!',
                         text: `สินค้า ${duplicateFound.products.join(', ')} ใน Invoice นี้เคยเคลมแล้วเมื่อ ${date} ยืนยันที่จะบันทึกซ้ำ?`,
-                        icon: 'warning', showCancelButton: true, confirmButtonColor: '#0ea5e9', confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก'
+                        icon: 'warning', showCancelButton: true, confirmButtonColor: '#4f46e5', confirmButtonText: 'ยืนยันบันทึก', cancelButtonText: 'ยกเลิก'
                     });
                     if (result.isConfirmed) await window.submitForm(selectedProducts);
-                    else { window.resetForm(); submitBtn.disabled = false; submitBtn.innerText = 'บันทึกรายการเคลม'; }
+                    else { window.resetForm(); }
                 } else {
                     await window.submitForm(selectedProducts);
                 }
             } catch (e) {
                  console.error(e);
-                 Swal.fire('Error', 'ตรวจสอบข้อมูลล้มเหลว', 'error');
-                 submitBtn.disabled = false; submitBtn.innerText = 'บันทึกรายการเคลม';
+                 Swal.fire('Error', 'เกิดข้อผิดพลาด', 'error');
+            } finally {
+                if(!submitBtn.disabled) return; // ถ้า submitForm ทำงานต่อ ไม่ต้อง reset ปุ่มตรงนี้
+                submitBtn.disabled = false; 
+                submitBtn.innerHTML = 'บันทึกรายการเคลม';
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
             }
         };
 
-        // 6. Submit Form (บันทึกจริง)
         window.submitForm = async (selectedProducts) => {
             const invoice = document.getElementById("invoice").value.trim();
             const remark = document.getElementById("remark").value.trim();
             const partNumbers = Array.from(document.querySelectorAll(".partNumberInput")).map(i => i.value.trim());
 
-            const payload = {
-                invoice,
-                partNumber: partNumbers,
-                product: selectedProducts,
-                remark,
-                userId: userId
-            };
+            const payload = { invoice, partNumber: partNumbers, product: selectedProducts, remark, userId: userId };
 
             try {
-                const res = await fetch('/.netlify/functions/saveClaim', {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
+                const res = await fetch('/.netlify/functions/saveClaim', { method: 'POST', body: JSON.stringify(payload) });
 
                 if(res.ok) {
-                    await Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ', showConfirmButton: false, timer: 1500 });
+                    await Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', showConfirmButton: false, timer: 1500 });
                     window.resetForm();
-                } else {
-                    throw new Error('Save failed');
-                }
+                } else { throw new Error('Save failed'); }
             } catch (e) { 
                 Swal.fire('Error', e.message, 'error'); 
             } finally {
                 const btn = document.getElementById("submitBtn");
                 btn.disabled = false;
-                btn.innerHTML = '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg> บันทึกรายการเคลม';
+                btn.innerHTML = 'บันทึกรายการเคลม';
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
             }
         };
 
-        // 7. Delete Claim (ลบ)
         window.deleteClaim = (id) => {
             Swal.fire({
-                title: 'ยืนยันการลบ?', text: "คุณต้องการลบรายการนี้ใช่หรือไม่", icon: 'warning',
-                showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#94a3b8', confirmButtonText: 'ลบรายการ'
+                title: 'ยืนยันลบ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'ลบรายการ'
             }).then(async res => {
                 if (res.isConfirmed) {
                     try {
                         await fetch(`/.netlify/functions/deleteClaim?id=${id}`, { method: 'DELETE' });
-                        
                         if (currentTotalCount > 0) currentTotalCount--;
                         window.loadPage(currentPage);
-                        
-                        Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, icon: 'success', title: 'ลบข้อมูลสำเร็จ' });
-                    } catch(e) {
-                        Swal.fire('Error', 'ลบข้อมูลไม่สำเร็จ', 'error');
-                    }
+                        Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, icon: 'success', title: 'ลบข้อมูลสำเร็จ' });
+                    } catch(e) { Swal.fire('Error', 'ลบข้อมูลไม่สำเร็จ', 'error'); }
                 }
             });
         };
 
-        // Helpers UI
+        // Helpers
         window.openHistoryModal = () => {
-            document.getElementById('historyModal').style.display = 'flex';
+            const modal = document.getElementById('historyModal');
+            modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             window.loadPage(1);
         };
-
         window.closeHistoryModal = () => {
             document.getElementById('historyModal').style.display = 'none';
             document.body.style.overflow = '';
         };
-
         window.updatePaginationUI = () => {
             document.getElementById('prevPageBtn').disabled = currentPage === 1;
             const totalPages = Math.ceil(currentTotalCount / pageSize);
             document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
             document.getElementById('pageInfo').innerText = `หน้า ${currentPage} / ${totalPages || 1}`;
         };
-
         window.loadNextPage = () => { currentPage++; window.loadPage(currentPage); };
         window.loadPrevPage = () => { if (currentPage > 1) { currentPage--; window.loadPage(currentPage); } };
 
@@ -808,173 +494,238 @@
         };
     </script>
 </head>
-<body>
-    <!-- Animated Background -->
-    <div class="background">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-    </div>
+<body class="text-slate-600 antialiased">
 
-    <div class="dashboard">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">G</div>
-                <span class="logo-text">GlassDash</span>
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-40 w-full backdrop-blur-md bg-white/70 border-b border-gray-100 px-6 py-3 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30 font-display">
+                G
             </div>
+            <div>
+                <h1 class="font-display font-semibold text-lg text-gray-800 leading-tight">Claim System</h1>
+                <p class="text-[10px] text-gray-400 font-medium tracking-wide">MANAGEMENT PORTAL</p>
+            </div>
+        </div>
 
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="#" class="active">
-                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="7" height="7" rx="1"/>
-                            <rect x="14" y="3" width="7" height="7" rx="1"/>
-                            <rect x="3" y="14" width="7" height="7" rx="1"/>
-                            <rect x="14" y="14" width="7" height="7" rx="1"/>
-                        </svg>
-                        Claim System
-                    </a>
-                </li>
-            </ul>
-
-            <div class="sidebar-footer">
-                <div class="user-profile">
-                    <div class="user-avatar">US</div>
-                    <div class="user-info">
-                        <div class="user-name">Current User</div>
-                        <div class="user-role" id="currentUserId">Loading...</div>
-                    </div>
+        <div class="flex items-center gap-4">
+            <button id="viewHistoryBtn" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-full text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                ประวัติการเคลม
+            </button>
+            <div class="flex items-center gap-2 pl-4 border-l border-gray-200">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-cyan-300 flex items-center justify-center text-white text-xs font-bold shadow-md">
+                    AD
+                </div>
+                <div class="hidden md:block text-right">
+                    <div class="text-xs font-bold text-gray-700">Admin User</div>
+                    <div class="text-[10px] text-gray-400 user-role">...</div>
                 </div>
             </div>
-        </aside>
+        </div>
+    </nav>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <nav class="navbar">
-                <h1 class="page-title">Claim Management</h1>
-            </nav>
+    <!-- Main Container -->
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        
+        <!-- Header Section -->
+        <div class="text-center mb-8 animate-fade-in-down">
+            <h2 class="font-display text-3xl font-bold text-gray-800 mb-2">บันทึกรายการเคลม</h2>
+            <p class="text-gray-500 text-sm">กรอกข้อมูลให้ครบถ้วนเพื่อบันทึกเข้าระบบ</p>
+        </div>
 
-            <div class="glass-card">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>เลขที่บิล (Invoice No.)</label>
-                        <div class="input-wrapper-invoice">
-                             <input type="text" id="invoice" placeholder="Ex. B107-P02-25042700022" required oninput="this.value = this.value.toUpperCase();">
-                             
-                             <button type="button" id="clearInvoiceBtn" class="icon-btn clear-input-btn" title="ล้างข้อมูล">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                             </button>
+        <!-- Card Form -->
+        <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-white p-6 md:p-10 relative overflow-hidden">
+            <!-- Decorative circle -->
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-indigo-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
 
-                             <button type="button" id="quickCheckBtn" class="icon-btn check-invoice-btn" title="ตรวจสอบประวัติทันที">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                
+                <!-- Invoice Input -->
+                <div class="col-span-1 md:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">เลขที่บิล (Invoice No.)</label>
+                    <div class="relative group">
+                        <input type="text" id="invoice" 
+                            class="input-transition w-full pl-5 pr-24 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 text-lg font-mono placeholder-gray-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" 
+                            placeholder="Ex. B107-P02-25042700022" required oninput="this.value = this.value.toUpperCase();">
+                        
+                        <div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+                            <button type="button" id="clearInvoiceBtn" class="hidden p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors" title="ล้างค่า">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                            <button type="button" id="quickCheckBtn" class="p-2 text-indigo-500 hover:text-white hover:bg-indigo-500 rounded-lg transition-all shadow-sm border border-indigo-100" title="ตรวจสอบประวัติ">
                                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                             </button>
+                            </button>
                         </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>ประเภทสินค้า</label>
-                        <div class="checkbox-group" id="productContainer">
-                            <label class="checkbox-item"><input type="checkbox" value="Film"> Film (ฟิล์ม)</label>
-                            <label class="checkbox-item"><input type="checkbox" value="Lense"> Lense (เลนส์)</label>
-                            <label class="checkbox-item"><input type="checkbox" value="Boxset"> Boxset </label>
-                            <label class="checkbox-item"><input type="checkbox" value="Cable"> Cable (สาย)</label>
-                            <label class="checkbox-item"><input type="checkbox" value="Case"> Case (เคส)</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label>รหัสสินค้า (Part Number)</label>
-                        <div id="partNumberContainer"></div>
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label>หมายเหตุ</label>
-                        <textarea id="remark" rows="3" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)..."></textarea>
                     </div>
                 </div>
 
-                <div class="actions">
-                    <button id="submitBtn" class="btn btn-primary">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                <!-- Product Selection -->
+                <div class="col-span-1">
+                    <label class="block text-sm font-semibold text-gray-700 mb-3 ml-1">เลือกประเภทสินค้า</label>
+                    <div class="grid grid-cols-1 gap-3" id="productContainer">
+                        
+                        <label class="checkbox-card cursor-pointer relative group">
+                            <input type="checkbox" value="Film" class="peer sr-only">
+                            <div class="p-3 bg-white border border-gray-200 rounded-xl flex items-center gap-3 group-hover:border-indigo-300">
+                                <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                </span>
+                                <span class="text-sm font-medium text-gray-600 group-hover:text-gray-900">Film (ฟิล์ม)</span>
+                                <div class="ml-auto w-5 h-5 border-2 border-gray-200 rounded-full peer-checked:bg-blue-500 peer-checked:border-blue-500 transition-colors"></div>
+                            </div>
+                        </label>
+
+                        <label class="checkbox-card cursor-pointer relative group">
+                            <input type="checkbox" value="Lense" class="peer sr-only">
+                            <div class="p-3 bg-white border border-gray-200 rounded-xl flex items-center gap-3 group-hover:border-indigo-300">
+                                <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                                </span>
+                                <span class="text-sm font-medium text-gray-600 group-hover:text-gray-900">Lense (เลนส์)</span>
+                                <div class="ml-auto w-5 h-5 border-2 border-gray-200 rounded-full peer-checked:bg-blue-500 peer-checked:border-blue-500 transition-colors"></div>
+                            </div>
+                        </label>
+
+                        <div class="grid grid-cols-2 gap-2">
+                             <label class="checkbox-card cursor-pointer relative group">
+                                <input type="checkbox" value="Boxset" class="peer sr-only">
+                                <div class="p-3 bg-white border border-gray-200 rounded-xl flex items-center gap-2 group-hover:border-indigo-300">
+                                    <div class="w-4 h-4 rounded-full border border-gray-300 peer-checked:bg-blue-500 peer-checked:border-blue-500"></div>
+                                    <span class="text-sm text-gray-600">Boxset</span>
+                                </div>
+                            </label>
+                             <label class="checkbox-card cursor-pointer relative group">
+                                <input type="checkbox" value="Cable" class="peer sr-only">
+                                <div class="p-3 bg-white border border-gray-200 rounded-xl flex items-center gap-2 group-hover:border-indigo-300">
+                                    <div class="w-4 h-4 rounded-full border border-gray-300 peer-checked:bg-blue-500 peer-checked:border-blue-500"></div>
+                                    <span class="text-sm text-gray-600">Cable</span>
+                                </div>
+                            </label>
+                             <label class="checkbox-card cursor-pointer relative group col-span-2">
+                                <input type="checkbox" value="Case" class="peer sr-only">
+                                <div class="p-3 bg-white border border-gray-200 rounded-xl flex items-center gap-2 group-hover:border-indigo-300">
+                                    <div class="w-4 h-4 rounded-full border border-gray-300 peer-checked:bg-blue-500 peer-checked:border-blue-500"></div>
+                                    <span class="text-sm text-gray-600">Case (เคส)</span>
+                                </div>
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Part Number & Remark -->
+                <div class="col-span-1 flex flex-col gap-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">รหัสสินค้า (Part Number)</label>
+                        <div id="partNumberContainer" class="min-h-[140px] max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+
+                    <div>
+                         <label class="block text-sm font-semibold text-gray-700 mb-2 ml-1">หมายเหตุ</label>
+                         <textarea id="remark" rows="3" class="input-transition w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 resize-none" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="col-span-1 md:col-span-2 pt-4 border-t border-gray-100">
+                    <button id="submitBtn" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold text-lg rounded-2xl shadow-lg shadow-indigo-500/30 transform transition-all active:scale-[0.98] flex justify-center items-center gap-2">
                         บันทึกรายการเคลม
                     </button>
-                    <button id="viewHistoryBtn" class="btn btn-secondary">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    
+                    <button id="viewHistoryMobile" class="sm:hidden w-full mt-3 py-3 bg-white text-gray-600 border border-gray-200 font-medium rounded-xl hover:bg-gray-50 transition-colors" onclick="window.openHistoryModal()">
                         ดูประวัติการเคลม
                     </button>
                 </div>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <!-- History Modal -->
-    <div id="historyModal" class="custom-modal-overlay">
-        <div class="modal-card">
-            <div class="modal-header">
-                <div style="display: flex; flex-direction: column;">
-                    <h3 style="font-size: 20px; font-weight: 700; color:white;">ประวัติรายการเคลมทั้งหมด</h3>
-                    <span id="totalCountDisplay" style="font-size: 13px; color: var(--primary-neon);">กำลังนับ...</span>
-                </div>
-                <button onclick="window.closeHistoryModal()" style="border:none; background:none; cursor:pointer; color:white; font-size: 28px;">&times;</button>
-            </div>
+    <div id="historyModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4 modal-enter">
+        <div class="bg-white w-full max-w-5xl h-[85vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
             
-            <div class="modal-body">
-                <div class="filters-wrapper">
-                    <div class="form-group" style="min-width: 80px;">
-                        <label>แสดง</label>
-                        <select id="pageSizeSelect">
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="min-width: 120px;">
-                        <label>ค้นหาจาก</label>
-                        <select id="searchTypeSelect">
-                            <option value="invoice">Invoice</option>
-                            <option value="part">Part No.</option>
-                        </select>
-                    </div>
-                    <div class="search-box">
-                        <div style="flex-grow:1; position:relative;">
-                            <input type="text" id="historySearchInput" placeholder="พิมพ์คำค้นหา..." style="width:100%; height:42px;">
-                            <button id="clearSearchBtn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; display: none;">&times;</button>
-                            <div id="suggestions" class="suggestion-box"></div>
+            <!-- Modal Header -->
+            <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">ประวัติการเคลม</h3>
+                    <p id="totalCountDisplay" class="text-xs font-semibold text-indigo-600">กำลังโหลด...</p>
+                </div>
+                <button onclick="window.closeHistoryModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 hover:bg-red-100 hover:text-red-500 transition-colors">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Filters -->
+            <div class="px-6 py-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-white">
+                 <div class="col-span-2 md:col-span-2">
+                     <label class="text-xs font-bold text-gray-500 mb-1 block">แสดง</label>
+                     <select id="pageSizeSelect" class="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-indigo-500">
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                 </div>
+                 <div class="col-span-3 md:col-span-2">
+                    <label class="text-xs font-bold text-gray-500 mb-1 block">ค้นหาจาก</label>
+                    <select id="searchTypeSelect" class="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-indigo-500">
+                       <option value="invoice">Invoice</option>
+                       <option value="part">Part No.</option>
+                   </select>
+                </div>
+                <div class="col-span-7 md:col-span-8 relative">
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <input type="text" id="historySearchInput" placeholder="พิมพ์คำค้นหา..." class="w-full p-2 pl-9 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                            <svg class="absolute left-3 top-2.5 text-gray-400" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            <button id="clearSearchBtn" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600 hidden">&times;</button>
+                            
+                            <!-- Suggestions Dropdown -->
+                            <div id="suggestions" class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-xl z-20 hidden overflow-hidden"></div>
                         </div>
-                        <button id="searchBtn" class="btn btn-primary" style="width: 50px; flex: none;">🔍</button>
-                        <button id="refreshHistoryBtn" class="btn btn-secondary" style="width: 50px; flex: none;">🔄</button>
+                        <button id="searchBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">ค้นหา</button>
+                        <button id="refreshHistoryBtn" class="px-3 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        </button>
                     </div>
                 </div>
+            </div>
 
-                <div style="text-align: center; padding-top: 10px;"><span id="historyStatus" style="font-size: 13px; color: var(--primary-neon);"></span></div>
-                
-                <div id="historyTableContainer">
-                    <table id="historyTable">
-                        <thead>
-                            <tr>
-                                <th style="width: 18%;">Invoice No.</th>
-                                <th style="width: 20%;">Part Number</th>
-                                <th style="width: 15%;">Product</th>
-                                <th style="width: 20%;">Remark</th>
-                                <th style="width: 15%;">Timestamp</th>
-                                <th style="width: 5%;">By</th>
-                                <th style="width: 7%; text-align:center;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyTableBody"></tbody>
-                    </table>
+            <!-- Table -->
+            <div class="flex-1 overflow-auto px-6 relative">
+                 <div class="text-center absolute top-2 left-0 right-0 pointer-events-none"><span id="historyStatus" class="text-xs text-indigo-500 font-bold bg-white/80 px-2 py-1 rounded-full"></span></div>
+                 
+                 <table class="w-full text-left border-collapse">
+                     <thead class="sticky top-0 bg-white shadow-sm z-10">
+                         <tr>
+                             <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Invoice No.</th>
+                             <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Part No.</th>
+                             <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">สินค้า</th>
+                             <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">หมายเหตุ</th>
+                             <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">เวลา</th>
+                             <th class="p-4 text-xs font-bold text-gray-400 uppercase tracking-wider">โดย</th>
+                             <th class="p-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider">Action</th>
+                         </tr>
+                     </thead>
+                     <tbody id="historyTableBody" class="divide-y divide-gray-100">
+                         <!-- Data Row Example -->
+                     </tbody>
+                 </table>
+            </div>
+
+            <!-- Footer Pagination -->
+            <div class="px-6 py-4 border-t border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <span id="pageInfo" class="text-sm text-gray-500 font-medium">หน้า 1</span>
+                <div class="flex gap-2">
+                    <button id="prevPageBtn" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" onclick="window.loadPrevPage()">ย้อนกลับ</button>
+                    <button id="nextPageBtn" class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" onclick="window.loadNextPage()">ถัดไป</button>
                 </div>
             </div>
 
-            <div class="modal-footer">
-                <span id="pageInfo" style="font-size:13px; color:var(--text-muted);">หน้า 1</span>
-                <div style="display: flex; gap: 8px;">
-                    <button id="prevPageBtn" class="btn btn-secondary" style="padding: 8px 16px; width: auto;" onclick="window.loadPrevPage()" disabled>ก่อนหน้า</button>
-                    <button id="nextPageBtn" class="btn btn-secondary" style="padding: 8px 16px; width: auto;" onclick="window.loadNextPage()">ถัดไป</button>
-                </div>
-            </div>
         </div>
     </div>
+
 </body>
 </html>
