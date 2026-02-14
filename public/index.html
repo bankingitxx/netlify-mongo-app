@@ -319,6 +319,8 @@
                             // ผู้ใช้ยืนยันว่าจะบันทึก invoice ซ้ำ
                             status.innerHTML = '<span class="text-blue-500">✅ พร้อมบันทึก</span>';
                             // อาจจะเปิดฟอร์มบันทึกอัตโนมัติ
+                            document.getElementById("invoice").disabled = false;
+                            document.getElementById("submitBtn").disabled = false;
                         }
                     });
                 }
