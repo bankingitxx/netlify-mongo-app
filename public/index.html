@@ -288,6 +288,30 @@
                     status.innerHTML = '<span class="text-green-500">✅ สามารถบันทึกได้</span>';
                 } else {
                     status.innerHTML = '<span class="text-red-500">❌ เคยมีการบันทึกแล้ว</span>';
+                    
+                    // แสดง Modal แสดง Part No. และสินค้า
+                    let historyHtml = '<div class="text-left text-sm flex flex-col gap-2">';
+                    data.forEach(d => {
+                        const prodDisplay = Array.isArray(d.product) ? d.product.join(', ') : (d.product || '');
+                        const partDisplay = Array.isArray(d.partNumber) ? d.partNumber.join(', ') : (d.partNumber || '');
+                        historyHtml += `
+                            <div class="border-l-4 border-red-500 pl-3">
+                                <div class="font-semibold text-gray-800">${d.invoice}</div>
+                                <div class="text-xs text-gray-600">Part No.: ${partDisplay}</div>
+                                <div class="text-xs text-gray-600">สินค้า: ${prodDisplay}</div>
+                                <div class="text-xs text-gray-400">${new Date(d.timestamp).toLocaleString('th-TH')}</div>
+                            </div>
+                        `;
+                    });
+                    historyHtml += '</div>';
+                    
+                    Swal.fire({
+                        title: '📋 พบประวัติการเคลม',
+                        html: historyHtml,
+                        icon: 'warning', 
+                        confirmButtonText: 'ปิด', 
+                        confirmButtonColor: '#ef4444'
+                    });
                 }
             } catch (error) {
                 if (status) {
