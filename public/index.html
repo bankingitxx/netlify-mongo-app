@@ -165,7 +165,7 @@
                 let limit = 10000;
                 let total = 0;
 
-                const firstRes = await fetch(`/.netlify/functions/getClaims?page=1&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
+                const firstRes = await fetch(`/api/claims?page=1&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
                 const firstJson = await firstRes.json();
                 total = firstJson.total;
                 allData = [...firstJson.data];
@@ -173,7 +173,7 @@
                 if (total > limit) {
                     let totalPages = Math.ceil(total / limit);
                     for (let p = 2; p <= totalPages; p++) {
-                        const res = await fetch(`/.netlify/functions/getClaims?page=${p}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
+                        const res = await fetch(`/api/claims?page=${p}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
                         const json = await res.json();
                         allData = [...allData, ...json.data];
                     }
@@ -210,20 +210,21 @@
             }
         };
 
-        window.quickCheckInvoice = async () => {
-            const invoice = document.getElementById('invoice').value.trim();
-            if(!invoice) {
-                Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, icon: 'info', title: 'กรุณากรอกเลข Invoice' });
+        window.checkInvoice = async () => {
+            const invoice = document.getElementById("invoice").value.trim();
+            const btn = document.getElementById("checkBtn");
+            const status = document.getElementById("invoiceStatus");
+
+            if (!invoice) {
+                status.innerHTML = '<span class="text-red-500">กรุณากรอกเลขที่ใบแจ้งหนี้</span>';
                 return;
             }
 
-            const btn = document.getElementById('quickCheckBtn');
-            const originalIcon = btn.innerHTML;
-            btn.innerHTML = '<div class="loader"></div>';
+            btn.disabled = true;
             btn.style.pointerEvents = 'none';
 
             try {
-                const res = await fetch(`/.netlify/functions/getClaims?mode=checkDuplicate&invoice=${invoice}`);
+                const res = await fetch(`/api/claims?mode=checkDuplicate&invoice=${invoice}`);
                 const data = await res.json();
 
                 if (data.length === 0) {
@@ -317,7 +318,7 @@
                 </div>`;
 
                try {
-                    const res = await fetch(`/.netlify/functions/getClaims?search=${val}&limit=5`);
+                    const res = await fetch(`/api/claims?search=${val}&limit=5`);
                     const json = await res.json();
                     const data = json.data;
 
@@ -361,7 +362,7 @@
                 const searchVal = document.getElementById('historySearchInput').value.trim();
                 const searchType = document.getElementById('searchTypeSelect').value;
                 
-                let url = `/.netlify/functions/getClaims?page=${page}&limit=${pageSize}`;
+                let url = `/api/claims?page=${page}&limit=${pageSize}`;
                 if(searchVal) {
                     url += `&search=${encodeURIComponent(searchVal)}&type=${searchType}`;
                 }
@@ -438,7 +439,7 @@
             submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
 
             try {
-                const res = await fetch(`/.netlify/functions/getClaims?mode=checkDuplicate&invoice=${invoice}`);
+                const res = await fetch(`/api/claims?mode=checkDuplicate&invoice=${invoice}`);
                 const existingClaims = await res.json();
 
                 let duplicateFound = null;
@@ -480,7 +481,7 @@
             const payload = { invoice, partNumber: partNumbers, product: selectedProducts, remark, userId: userId };
 
             try {
-                const res = await fetch('/.netlify/functions/saveClaim', { method: 'POST', body: JSON.stringify(payload) });
+                const res = await fetch('/api/claims', { method: 'POST', body: JSON.stringify(payload) });
 
                 if(res.ok) {
                     await Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', showConfirmButton: false, timer: 1500 });
@@ -502,7 +503,7 @@
             }).then(async res => {
                 if (res.isConfirmed) {
                     try {
-                        await fetch(`/.netlify/functions/deleteClaim?id=${id}`, { method: 'DELETE' });
+                        await fetch(`/api/claims/${id}`, { method: 'DELETE' });
                         if (currentTotalCount > 0) currentTotalCount--;
                         window.loadPage(currentPage);
                         Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, icon: 'success', title: 'ลบข้อมูลสำเร็จ' });
