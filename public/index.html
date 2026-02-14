@@ -285,11 +285,26 @@
                 const data = await res.json();
 
                 if (data.length === 0) {
+                    // กรณีไม่มี invoice นี้
                     status.innerHTML = '<span class="text-green-500">✅ สามารถบันทึกได้</span>';
+                    
+                    // แสดง Modal ยืนยันว่าสามารถบันทึก
+                    Swal.fire({
+                        title: '✅ ยังไม่เคยมีการเคลม',
+                        text: `Invoice: ${invoice} สามารถบันทึกได้`,
+                        icon: 'success', 
+                        confirmButtonText: 'รับทราบ', 
+                        confirmButtonColor: '#10b981'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            status.innerHTML = '<span class="text-blue-500">✅ พร้อมบันทึก</span>';
+                        }
+                    });
                 } else {
+                    // กรณีมี invoice นี้แล้ว
                     status.innerHTML = '<span class="text-red-500">❌ เคยมีการบันทึกแล้ว</span>';
                     
-                    // แสดง Modal แสดง Part No. และสินค้า
+                    // แสดง Modal แสดงรายละเอียด
                     let historyHtml = '<div class="text-left text-sm flex flex-col gap-2">';
                     data.forEach(d => {
                         const prodDisplay = Array.isArray(d.product) ? d.product.join(', ') : (d.product || '');
@@ -319,8 +334,6 @@
                             // ผู้ใช้ยืนยันว่าจะบันทึก invoice ซ้ำ
                             status.innerHTML = '<span class="text-blue-500">✅ พร้อมบันทึก</span>';
                             // อาจจะเปิดฟอร์มบันทึกอัตโนมัติ
-                            document.getElementById("invoice").disabled = false;
-                            document.getElementById("submitBtn").disabled = false;
                         }
                     });
                 }
