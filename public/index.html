@@ -266,7 +266,14 @@
             const status = document.getElementById("invoiceStatus");
 
             if (!invoice) {
-                status.innerHTML = '<span class="text-red-500">กรุณากรอกเลขที่ใบแจ้งหนี้</span>';
+                if (status) {
+                    status.innerHTML = '<span class="text-red-500">กรุณากรอกเลขที่ใบแจ้งหนี้</span>';
+                }
+                return;
+            }
+
+            if (!btn || !status) {
+                console.error('DOM elements not found');
                 return;
             }
 
@@ -283,10 +290,15 @@
                     status.innerHTML = '<span class="text-red-500">❌ เคยมีการบันทึกแล้ว</span>';
                 }
             } catch (error) {
-                status.innerHTML = '<span class="text-red-500">❌ ตรวจสอบไม่ได้</span>';
+                if (status) {
+                    status.innerHTML = '<span class="text-red-500">❌ ตรวจสอบไม่ได้</span>';
+                }
+                console.error('Quick check error:', error);
             } finally {
-                btn.disabled = false;
-                btn.style.pointerEvents = 'auto';
+                if (btn) {
+                    btn.disabled = false;
+                    btn.style.pointerEvents = 'auto';
+                }
             }
         };
 
