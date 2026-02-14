@@ -309,8 +309,17 @@
                         title: '📋 พบประวัติการเคลม',
                         html: historyHtml,
                         icon: 'warning', 
-                        confirmButtonText: 'ปิด', 
-                        confirmButtonColor: '#ef4444'
+                        showCancelButton: true,
+                        confirmButtonText: 'รับทราบ', 
+                        cancelButtonText: 'ยกเลิก',
+                        confirmButtonColor: '#10b981',
+                        cancelButtonColor: '#6b7280'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // ผู้ใช้ยืนยันว่าจะบันทึก invoice ซ้ำ
+                            status.innerHTML = '<span class="text-blue-500">✅ พร้อมบันทึก</span>';
+                            // อาจจะเปิดฟอร์มบันทึกอัตโนมัติ
+                        }
                     });
                 }
             } catch (error) {
