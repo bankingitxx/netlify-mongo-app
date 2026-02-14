@@ -236,28 +236,56 @@
                 } else {
                     let historyHtml = '<div class="text-left text-sm flex flex-col gap-2">';
                     data.forEach(d => {
-                        const date = new Date(d.timestamp).toLocaleDateString('th-TH');
-                        const prods = Array.isArray(d.product) ? d.product.join(', ') : d.product;
+                        const prodDisplay = Array.isArray(d.product) ? d.product.join(', ') : (d.product || '');
                         historyHtml += `
-                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                <div class="font-semibold text-gray-700">${prods}</div>
-                                <div class="text-xs text-gray-500">วันที่: ${date}</div>
-                                <div class="text-xs text-blue-500 mt-1">Part: ${d.partNumber.join(', ')}</div>
-                            </div>`;
+                            <div class="border-l-4 border-blue-500 pl-3">
+                                <div class="font-semibold text-gray-800">${d.invoice}</div>
+                                <div class="text-xs text-gray-600">${prodDisplay}</div>
+                                <div class="text-xs text-gray-400">${new Date(d.timestamp).toLocaleString('th-TH')}</div>
+                            </div>
+                        `;
                     });
                     historyHtml += '</div>';
-
                     Swal.fire({
-                        title: '⚠️ เคยมีการเคลมแล้ว!',
+                        title: '📋 พบประวัติการเคลม',
                         html: historyHtml,
-                        icon: 'warning', confirmButtonText: 'รับทราบ', confirmButtonColor: '#f59e0b'
+                        icon: 'info', confirmButtonText: 'ตกลง', confirmButtonColor: '#4f46e5'
                     });
                 }
-            } catch(e) {
-                console.error(e);
-                Swal.fire('Error', 'เชื่อมต่อ Server ไม่ได้', 'error');
+            } catch (error) {
+                Swal.fire('Error', 'เกิดข้อผิดพลาดในการตรวจสอบ', 'error');
             } finally {
-                btn.innerHTML = originalIcon;
+                btn.disabled = false;
+                btn.style.pointerEvents = 'auto';
+            }
+        };
+
+        window.quickCheckInvoice = async () => {
+            const invoice = document.getElementById("invoice").value.trim();
+            const btn = document.getElementById("quickCheckBtn");
+            const status = document.getElementById("invoiceStatus");
+
+            if (!invoice) {
+                status.innerHTML = '<span class="text-red-500">กรุณากรอกเลขที่ใบแจ้งหนี้</span>';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.style.pointerEvents = 'none';
+
+            try {
+                const res = await fetch(`/api/claims?mode=checkDuplicate&invoice=${invoice}`);
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    status.innerHTML = '<span class="text-green-500">✅ สามารถบันทึกได้</span>';
+                } else {
+                    status.innerHTML = '<span class="text-red-500">❌ เคยมีการบันทึกแล้ว</span>';
+                }
+            } catch (error) {
+                status.innerHTML = '<span class="text-red-500">❌ ตรวจสอบไม่ได้</span>';
+            } finally {
+                btn.disabled = false;
                 btn.style.pointerEvents = 'auto';
             }
         };
