@@ -593,11 +593,13 @@
                 console.log('Debug - response text:', responseText);
 
                 if(res.ok) {
-                    await Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', showConfirmButton: false, timer: 1500 });
-                    window.resetForm();
-                } else { 
-                    throw new Error(`Save failed: ${res.status} - ${responseText}`); 
-                }
+    await Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', showConfirmButton: false, timer: 1500 });
+    window.resetForm();
+    // โหลดข้อมูลใหม่เพื่ออัปเดตตาราง
+    window.loadPage(1);
+} else { 
+    throw new Error(`Save failed: ${res.status} - ${responseText}`); 
+}
             } catch (e) { 
                 console.error('Save error:', e);
                 Swal.fire('Error', e.message, 'error'); 
