@@ -565,6 +565,11 @@
             const invoice = document.getElementById("invoice").value.trim();
             const remark = document.getElementById("remark").value.trim();
             const partNumbers = Array.from(document.querySelectorAll(".partNumberInput")).map(i => i.value.trim());
+            
+            // ถ้าไม่มี selectedProducts ให้ดึงจาก checkbox ที่เลือก
+            if (!selectedProducts) {
+                selectedProducts = Array.from(document.querySelectorAll('#productContainer input[type="checkbox"]:checked')).map(cb => cb.value);
+            }
 
             const payload = { invoice, partNumber: partNumbers, product: selectedProducts, remark, userId: userId };
 
