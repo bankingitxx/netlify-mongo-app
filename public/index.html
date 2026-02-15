@@ -486,11 +486,16 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-none";
                 const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleString('th-TH') : '-';
-                const parts = Array.isArray(item.partNumber) ? item.partNumber.join(', ') : item.partNumber;
-                const products = Array.isArray(item.product) ? item.product.join(', ') : item.product;
+                const invoiceText = item && item.invoice ? item.invoice : '-';
+                const parts = Array.isArray(item?.partNumber)
+                    ? item.partNumber.filter(Boolean).join(', ')
+                    : (item?.partNumber || '-');
+                const products = Array.isArray(item?.product)
+                    ? item.product.filter(Boolean).join(', ')
+                    : (item?.product || '-');
                 
                 tr.innerHTML = `
-                  <td class="px-4 py-4 text-sm font-medium text-gray-900 font-mono">${item.invoice}</td>
+                  <td class="px-4 py-4 text-sm font-medium text-gray-900 font-mono">${invoiceText}</td>
                   <td class="px-4 py-4 text-sm text-gray-600"><span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded-md text-xs font-semibold">${parts}</span></td>
                   <td class="px-4 py-4 text-sm text-gray-600">${products}</td>
                   <td class="px-4 py-4 text-sm text-gray-500">${item.remark || '-'}</td>
@@ -566,42 +571,29 @@
             const remark = document.getElementById("remark").value.trim();
             const partNumbers = Array.from(document.querySelectorAll(".partNumberInput")).map(i => i.value.trim());
             
-            // Debug: แสดงค่าที่ได้
-            console.log('Debug - invoice:', invoice);
-            console.log('Debug - partNumbers:', partNumbers);
-            console.log('Debug - selectedProducts:', selectedProducts);
-            
             // ถ้าไม่มี selectedProducts ให้ดึงจาก checkbox ที่เลือก
             if (!selectedProducts) {
                 selectedProducts = Array.from(document.querySelectorAll('#productContainer input[type="checkbox"]:checked')).map(cb => cb.value);
             }
             
-            console.log('Debug - final selectedProducts:', selectedProducts);
-
             const payload = { invoice, partNumber: partNumbers, product: selectedProducts, remark, userId: userId };
-            
-            console.log('Debug - payload:', payload);
-            console.log('Debug - payload JSON:', JSON.stringify(payload));
 
             try {
-                const res = await fetch('/api/claims', { method: 'POST', body: JSON.stringify(payload) });
-                
-                console.log('Debug - response status:', res.status);
-                console.log('Debug - response ok:', res.ok);
-                
-                const responseText = await res.text();
-                console.log('Debug - response text:', responseText);
+                const res = await fetch('/api/claims', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
                 if(res.ok) {
-    await Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', showConfirmButton: false, timer: 1500 });
-    window.resetForm();
-    // โหลดข้อมูลใหม่เพื่ออัปเดตตาราง
-    window.loadPage(1);
-} else { 
-    throw new Error(`Save failed: ${res.status} - ${responseText}`); 
-}
+                    await Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', showConfirmButton: false, timer: 1500 });
+                    window.resetForm();
+                    window.loadPage(1);
+                } else {
+                    const responseText = await res.text();
+                    throw new Error(`Save failed: ${res.status} - ${responseText}`);
+                }
             } catch (e) { 
-                console.error('Save error:', e);
                 Swal.fire('Error', e.message, 'error'); 
             } finally {
                 const btn = document.getElementById("submitBtn");
