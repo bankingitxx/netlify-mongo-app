@@ -566,12 +566,21 @@
             const remark = document.getElementById("remark").value.trim();
             const partNumbers = Array.from(document.querySelectorAll(".partNumberInput")).map(i => i.value.trim());
             
+            // Debug: แสดงค่าที่ได้
+            console.log('Debug - invoice:', invoice);
+            console.log('Debug - partNumbers:', partNumbers);
+            console.log('Debug - selectedProducts:', selectedProducts);
+            
             // ถ้าไม่มี selectedProducts ให้ดึงจาก checkbox ที่เลือก
             if (!selectedProducts) {
                 selectedProducts = Array.from(document.querySelectorAll('#productContainer input[type="checkbox"]:checked')).map(cb => cb.value);
             }
+            
+            console.log('Debug - final selectedProducts:', selectedProducts);
 
             const payload = { invoice, partNumber: partNumbers, product: selectedProducts, remark, userId: userId };
+            
+            console.log('Debug - payload:', payload);
 
             try {
                 const res = await fetch('/api/claims', { method: 'POST', body: JSON.stringify(payload) });
@@ -581,6 +590,7 @@
                     window.resetForm();
                 } else { throw new Error('Save failed'); }
             } catch (e) { 
+                console.error('Save error:', e);
                 Swal.fire('Error', e.message, 'error'); 
             } finally {
                 const btn = document.getElementById("submitBtn");
