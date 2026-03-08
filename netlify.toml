@@ -3,7 +3,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "http://45.136.254.203:3001/api/:splat"
+  to = "https://claimapi.istudionks.theworkpc.com/api/:splat"
   status = 200
   force = true
   signed = false
