@@ -165,7 +165,7 @@
                 let limit = 10000;
                 let total = 0;
 
-                const firstRes = await fetchWithTimeout(`https://claims-api.duckdns.org/api/claims?page=1&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
+                const firstRes = await fetchWithTimeout(`https://claimapi.istudionks.theworkpc.com/api/claims?page=1&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
                 const firstJson = await firstRes.json();
                 total = firstJson.total;
                 allData = [...firstJson.data];
@@ -173,7 +173,7 @@
                 if (total > limit) {
                     let totalPages = Math.ceil(total / limit);
                     for (let p = 2; p <= totalPages; p++) {
-                        const res = await fetchWithTimeout(`https://claims-api.duckdns.org/api/claims?page=${p}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
+                        const res = await fetchWithTimeout(`https://claimapi.istudionks.theworkpc.com/api/claims?page=${p}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`);
                         const json = await res.json();
                         allData = [...allData, ...json.data];
                     }
@@ -224,7 +224,7 @@
             btn.style.pointerEvents = 'none';
 
             try {
-                const res = await fetchWithTimeout(`https://claims-api.duckdns.org/api/claims?mode=checkDuplicate&invoice=${invoice}`);
+                const res = await fetchWithTimeout(`https://claimapi.istudionks.theworkpc.com/api/claims?mode=checkDuplicate&invoice=${invoice}`);
                 const data = await res.json();
 
                 if (data.length === 0) {
@@ -281,7 +281,7 @@
             btn.style.pointerEvents = 'none';
 
             try {
-                const res = await fetchWithTimeout(`https://claims-api.duckdns.org/api/claims?mode=checkDuplicate&invoice=${invoice}`);
+                const res = await fetchWithTimeout(`https://claimapi.istudionks.theworkpc.com/api/claims?mode=checkDuplicate&invoice=${invoice}`);
                 const data = await res.json();
 
                 if (data.length === 0) {
@@ -406,7 +406,7 @@
                 </div>`;
 
                try {
-                    const res = await fetchWithTimeout(`https://claims-api.duckdns.org/api/claims?search=${val}&limit=5`);
+                    const res = await fetchWithTimeout(`https://claimapi.istudionks.theworkpc.com/api/claims?search=${val}&limit=5`);
                     const json = await res.json();
                     const data = json.data;
 
@@ -480,7 +480,7 @@
                     url += `&search=${encodeURIComponent(searchVal)}&type=${searchType}`;
                 }
 
-                const res = await fetchWithTimeout(`https://claims-api.duckdns.org${url}`);
+                const res = await fetchWithTimeout(`https://claimapi.istudionks.theworkpc.com${url}`);
                 const json = await res.json();
                 
                 const data = json.data || [];
@@ -557,7 +557,7 @@
             submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
 
             try {
-                const res = await fetchWithTimeout(`https://claims-api.duckdns.org/api/claims?mode=checkDuplicate&invoice=${invoice}`);
+                const res = await fetchWithTimeout(`https://claimapi.istudionks.theworkpc.com/api/claims?mode=checkDuplicate&invoice=${invoice}`);
                 const existingClaims = await res.json();
 
                 let duplicateFound = null;
@@ -604,7 +604,7 @@
             const payload = { invoice, partNumber: partNumbers, product: selectedProducts, remark, userId: userId };
 
             try {
-                const res = await fetchWithTimeout('https://claims-api.duckdns.org/api/claims', {
+                const res = await fetchWithTimeout('https://claimapi.istudionks.theworkpc.com/api/claims', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -634,7 +634,7 @@
             }).then(async res => {
                 if (res.isConfirmed) {
                     try {
-                        await fetchWithTimeout(`https://claims-api.duckdns.org/api/claims/${id}`, { method: 'DELETE' });
+                        await fetchWithTimeout(`https://claimapi.istudionks.theworkpc.com/api/claims/${id}`, { method: 'DELETE' });
                         if (currentTotalCount > 0) currentTotalCount--;
                         window.loadPage(currentPage);
                         Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, icon: 'success', title: 'ลบข้อมูลสำเร็จ' });
